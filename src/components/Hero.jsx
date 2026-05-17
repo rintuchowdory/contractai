@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
 const CONTRACT_TYPES = [
   'Non-Disclosure Agreement (NDA)',
@@ -74,26 +74,20 @@ export default function Hero({ scrollTo }) {
     setGenerating(true)
     setShowResult(false)
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1500,
-          system: 'You are a professional legal document drafter. Generate clear, structured, legally sound contracts with numbered sections. Be thorough but concise.',
-          messages: [{
-            role: 'user',
-            content: `Generate a professional ${contractType} based on:\n\n${description}\n\nInclude: parties, key terms, obligations, IP (if relevant), confidentiality, termination, governing law, and signature blocks. Use numbered sections.`,
-          }],
-        }),
-      })
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{ text: `Generate a professional ${contractType} based on:\n\n${description}\n\nInclude: parties, key terms, obligations, confidentiality, termination, governing law, signature blocks. Use numbered sections.` }]
+            }]
+          }),
+        }
+      )
       const data = await res.json()
-      const text = data.content?.map(i => i.text || '').join('') || 'Error: No response.'
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Error generating contract.'
       setResult(text)
       setShowResult(true)
     } catch {
