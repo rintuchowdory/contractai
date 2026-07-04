@@ -1,4 +1,4 @@
-name: Deploy ContractAI to GitHub Pages
+name: Deploy GitHub Pages
 
 on:
   push:
@@ -11,35 +11,41 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: github-pages
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: 20
+          cache: npm
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Build site for GitHub Pages
         env:
-          # Secret set in: GitHub repo → Settings → Secrets and variables → Actions
-          VITE_ANTHROPIC_API_KEY: ${{ secrets.VITE_ANTHROPIC_API_KEY }}
+          DEPLOY_TARGET: github-pages
+        run: npm run build
+
+      - name: Add SPA fallback page
+        run: cp dist/index.html dist/404.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: ./dist
 
   deploy:
     needs: build
@@ -47,6 +53,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
