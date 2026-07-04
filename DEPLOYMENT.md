@@ -2,42 +2,64 @@
 
 ## Current deployment posture
 
-This repository appears to be a Vite + React frontend that is already set up for GitHub Pages deployment.
+This repository now supports **two deployment targets**:
+
+- **Vercel** for the AI-enabled app with the secure Groq server-side proxy
+- **GitHub Pages** for the static frontend build
 
 ## Recommended release flow
 
 1. Open a pull request into `main`
 2. Let the CI workflow validate install, optional lint, optional tests, and production build
 3. Merge only after CI passes
-4. Let the existing deployment workflow publish the built site
+4. Let the GitHub Pages workflow publish the static site from the Vite `dist/` build output
+5. Use Vercel separately when you want the server-side Groq endpoint to be live
 
-## GitHub Pages checklist
+## GitHub Pages behavior
 
-- Confirm the repository Pages source matches the deployment workflow strategy used in `.github/workflows/deploy.yml`
-- If the site is served as a project page, make sure the Vite base path matches the repository name when needed
-- Verify the built output directory is the Vite default `dist/` unless the deployment workflow overrides it
+The Pages workflow now:
+
+- installs dependencies with `npm ci`
+- builds the Vite app with a Pages-specific base path
+- uploads the generated `dist/` directory as the Pages artifact
+- deploys the artifact with GitHub Actions Pages deployment
+- creates a `404.html` fallback from `index.html` to reduce refresh issues for SPA-style navigation
+
+### Branch and output
+
+- Trigger: pushes to `main` or manual workflow dispatch
+- Output directory: `dist/`
+- Project-page base path: `/contractai/`
+
+## Vercel behavior
+
+Use **Vercel** when you want the secure server-side Groq flow.
+
+Important rule:
+- `GROQ_API_KEY` should stay only in Vercel environment variables, not in frontend code and not in GitHub Pages.
 
 ## Environment variables and API keys
 
 Do **not** expose real AI provider secrets directly to browser code.
 
-Important rule:
-- If a variable is injected into a frontend build, users can usually recover it from the shipped JavaScript bundle or network traffic.
+If a variable is injected into a frontend build, users can usually recover it from the shipped JavaScript bundle or network traffic.
 
 Safer approach:
-- Keep provider secrets on a backend or serverless function
-- Let the frontend call that backend endpoint instead of calling the provider directly
-- Store secrets in GitHub repository secrets only for server-side use in CI or deployment, not for permanent client-side runtime access
 
-## When an API key is actually needed
+- keep provider secrets on a backend or serverless function
+- let the frontend call that backend endpoint instead of calling the provider directly
+- store secrets only in server-side runtime environments
 
-A key is only needed if ContractAI is going to make live Gemini or other AI API requests.
+## Manual GitHub Pages checklist
 
-- For a static marketing/demo site: no API key is needed
-- For real AI analysis from the app: use a backend proxy and keep the provider key server-side
+1. Open repository **Settings → Pages**
+2. Ensure the source is **GitHub Actions**
+3. Merge the PR into `main`
+4. Wait for the **Deploy GitHub Pages** workflow to finish
+5. Open the published Pages URL and verify static pages load correctly
 
 ## Suggested next improvements
 
-- Add a dedicated lint script if one is not present yet
-- Add at least one smoke test for the landing page
-- Review the deployment workflow to ensure it only runs after a successful build validation
+- wire the visible ContractAI UI to the new `/api/groq` endpoint when you are ready to make the AI flow live on Vercel
+- add at least one smoke test for the landing page
+- add a lint script if you want CI to enforce code style automatically

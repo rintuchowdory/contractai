@@ -1,8 +1,11 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-// Change '/contractai/' to match your GitHub repo name exactly
+const isGitHubPages =
+  process.env.DEPLOY_TARGET === 'github-pages' ||
+  process.env.GITHUB_ACTIONS === 'true';
+
 export default defineConfig({
   plugins: [react()],
-  base: '/contractai/',
-})
+  base: isGitHubPages ? '/contractai/' : '/',
+});
