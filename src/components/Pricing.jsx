@@ -44,7 +44,7 @@ const PLANS = [
   },
 ]
 
-export default function Pricing() {
+export default function Pricing({ scrollTo }) {
   const [yearly, setYearly] = useState(false)
 
   return (
@@ -81,7 +81,7 @@ export default function Pricing() {
                 ${yearly ? yr : monthly}
               </div>
               <div style={{ fontSize: 14, color: popular ? 'rgba(255,255,255,0.7)' : '#9ca3af', marginBottom: 28 }}>/month</div>
-              <button style={{ width: '100%', padding: 13, borderRadius: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', border: 'none', background: popular ? '#fff' : '#fef2f2', color: 'var(--red)', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <button onClick={() => scrollTo('hero')} style={{ width: '100%', padding: 13, borderRadius: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', border: 'none', background: popular ? '#fff' : '#fef2f2', color: 'var(--red)', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 Start Free Trial →
               </button>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

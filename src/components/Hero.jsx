@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
-
 const CONTRACT_TYPES = [
   'Non-Disclosure Agreement (NDA)',
   'Freelance Agreement',
@@ -74,24 +72,19 @@ export default function Hero({ scrollTo }) {
     setGenerating(true)
     setShowResult(false)
     try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: `Generate a professional ${contractType} based on:\n\n${description}\n\nInclude: parties, key terms, obligations, confidentiality, termination, governing law, signature blocks. Use numbered sections.` }]
-            }]
-          }),
-        }
-      )
+      const res = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `Generate a professional ${contractType} based on:\n\n${description}\n\nInclude: parties, key terms, obligations, confidentiality, termination, governing law, signature blocks. Use numbered sections.`,
+        }),
+      })
       const data = await res.json()
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Error generating contract.'
-      setResult(text)
+      if (!res.ok) throw new Error(data?.error || 'Contract generation failed.')
+      setResult(data.content || 'Error generating contract.')
       setShowResult(true)
     } catch {
-      setResult('Error generating contract. Check your API key and try again.')
+      setResult('Error generating contract. Please try again in a moment.')
       setShowResult(true)
     }
     setGenerating(false)

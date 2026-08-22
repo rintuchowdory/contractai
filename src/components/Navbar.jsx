@@ -42,7 +42,7 @@ export default function Navbar({ scrollTo }) {
         ))}
       </div>
       <div style={s.right}>
-        <button style={s.ghost}>Login</button>
+        <button style={s.ghost} onClick={() => scrollTo('hero')}>Login</button>
         <button style={s.cta} onClick={() => scrollTo('hero')}>Start Free Trial →</button>
       </div>
     </nav>

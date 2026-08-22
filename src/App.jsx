@@ -23,7 +23,7 @@ export default function App() {
       <ContractTypes scrollTo={scrollTo} />
       <Benefits />
       <Industry scrollTo={scrollTo} />
-      <Pricing />
+      <Pricing scrollTo={scrollTo} />
       <Footer />
     </>
   )
