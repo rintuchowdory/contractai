@@ -83,8 +83,8 @@ export default function Hero({ scrollTo }) {
       if (!res.ok) throw new Error(data?.error || 'Contract generation failed.')
       setResult(data.content || 'Error generating contract.')
       setShowResult(true)
-    } catch {
-      setResult('Error generating contract. Please try again in a moment.')
+    } catch (err) {
+      setResult(err?.message ? `Error generating contract: ${err.message}` : 'Error generating contract. Please try again in a moment.')
       setShowResult(true)
     }
     setGenerating(false)

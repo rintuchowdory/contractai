@@ -28,7 +28,7 @@ export async function onRequestPost(context) {
 
   try {
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,10 +47,23 @@ export async function onRequestPost(context) {
       );
     }
 
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    if (!text) {
+      const blockReason = data?.promptFeedback?.blockReason;
+      const finishReason = data?.candidates?.[0]?.finishReason;
+      return new Response(
+        JSON.stringify({
+          error: blockReason
+            ? `Blocked by Gemini safety filters (${blockReason}).`
+            : `Gemini returned no content${finishReason ? ` (${finishReason})` : ''}.`,
+        }),
+        { status: 502, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     return new Response(
-      JSON.stringify({
-        content: data?.candidates?.[0]?.content?.parts?.[0]?.text || '',
-      }),
+      JSON.stringify({ content: text }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
